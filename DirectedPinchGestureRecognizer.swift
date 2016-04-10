@@ -198,7 +198,7 @@ public extension DirectedPinchGestureRecognizer {
      - parameter orientation: The orientation. Defaults to `nil`, in which case `initialOrientation` is used.
      - parameter divergence: The divergence. Defaults to `nil`, in which case `initialDivergence` is used.
      
-     - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `linearScale(forOrientation: .Vertical, andDivergence: .Outwards)` should return `10.0`.
+     - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `linearScale(inOrientation: .Vertical, andDivergence: .Outwards)` should return `10.0`.
      */
     
     public func linearScale(inOrientation orientation: Orientation? = nil, andDivergence divergence: Divergence? = nil) -> CGFloat {
@@ -224,7 +224,7 @@ public extension DirectedPinchGestureRecognizer {
      - parameter orientation: The orientation. Defaults to `nil`, in which case `initialOrientation` is used.
      - parameter divergence: The divergence. Defaults to `nil`, in which case `initialDivergence` is used.
      
-     - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `geometricScale(forOrientation: .Vertical, andDivergence: .Outwards)` should return `1.5`.
+     - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `geometricScale(inOrientation: .Vertical, andDivergence: .Outwards)` should return `1.5`.
      */
     
     public func geometricScale(inOrientation orientation: Orientation? = nil, withDivergence divergence: Divergence? = nil) -> CGFloat {
