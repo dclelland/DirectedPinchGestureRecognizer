@@ -10,7 +10,7 @@ import UIKit
 import UIKit.UIGestureRecognizerSubclass
 
 /// Extension of `UIGestureRecognizerDelegate` which allows the delegate to receive messages when the pinch gesture recognizer starts, updates, cancels, and finishes. The `delegate` property can be set to a class implementing `DirectedPinchGestureRecognizerDelegate` and it will receive these messages.
-@objc protocol DirectedPinchGestureRecognizerDelegate: UIGestureRecognizerDelegate {
+@objc public protocol DirectedPinchGestureRecognizerDelegate: UIGestureRecognizerDelegate {
     
     /// Called when the pinch gesture recognizer starts.
     optional func directedPinchGestureRecognizerDidStart(gestureRecognizer: DirectedPinchGestureRecognizer)
@@ -26,10 +26,10 @@ import UIKit.UIGestureRecognizerSubclass
 
 }
 
-class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
+public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     
     /// The pinch gesture recognizer's orientation. Also used to calculate attributes for a given orientation.
-    enum Orientation {
+    public enum Orientation {
         /// The pinch gesture recognizer's touches are oriented vertically relative to one another.
         case Vertical
         /// The pinch gesture recognizer's touches are oriented horizontally relative to one another.
@@ -37,7 +37,7 @@ class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     }
     
     /// The pinch gesture recognizer's divergence type, i.e. inwards or outwards. Also used to calculate attributes for a given type.
-    enum Divergence {
+    public enum Divergence {
         /// The pinch gesture recognizer's touches move inwards relative to one another.
         case Inwards
         /// The pinch gesture recognizer's touches move outwards relative to one another.
@@ -47,48 +47,48 @@ class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     // MARK: Configuration
     
     /// Minimum linear scale (in `initialOrientation` and `initialDivergence`) required for the gesture to finish. Defaults to `0.0`.
-    @IBInspectable var minimumLinearScale: CGFloat = 0.0
+    @IBInspectable public var minimumLinearScale: CGFloat = 0.0
     
     /// Minimum geometric scale (in `initialOrientation` and `initialDivergence`) required for the gesture to finish. Defaults to `1.0`.
     /// **KNOWN ISSUE**: As this variable is `@IBInspectable`, its value may be reset to `0.0` when used in Interface Builder.
-    @IBInspectable var minimumGeometricScale: CGFloat = 1.0
+    @IBInspectable public var minimumGeometricScale: CGFloat = 1.0
     
     // MARK: Internal variables
     
     /// The current location in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
-    private(set) var initialLocation: CGPoint?
+    public private(set) var initialLocation: CGPoint?
     
     /// The current location of both touches in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
-    private(set) var initialLocations: (CGPoint, CGPoint)?
+    public private(set) var initialLocations: (CGPoint, CGPoint)?
     
     /// The current orientation in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
-    private(set) var initialOrientation: Orientation?
+    public private(set) var initialOrientation: Orientation?
     
     /// The current divergence in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
-    private(set) var initialDivergence: Divergence?
+    public private(set) var initialDivergence: Divergence?
     
     // MARK: Delegation
     
-    override var delegate: UIGestureRecognizerDelegate? {
+    override public var delegate: UIGestureRecognizerDelegate? {
         didSet {
             self.addTarget(self, action: "onPinch")
         }
     }
     
-    private var directedPinchDelegate: DirectedPinchGestureRecognizerDelegate? {
+    internal var directedPinchDelegate: DirectedPinchGestureRecognizerDelegate? {
         return delegate as? DirectedPinchGestureRecognizerDelegate
     }
     
     // MARK: Initialization
     
     /// Initialize the pinch gesture recognizer with no target or action set.
-    convenience init() {
+    public convenience init() {
         self.init(target: nil, action: nil)
     }
     
     // MARK: Overrides
     
-    override func reset() {
+    public override func reset() {
         super.reset()
         
         initialLocation = nil
@@ -99,8 +99,7 @@ class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     
     // MARK: Actions
     
-    /// Called when the pinch gesture recognizer updates. Final function which should otherwise be private, as this method's selector is added as a target when the `delegate` is set, and selectors require their methods to be public.
-    final func onPinch() {
+    internal func onPinch() {
         if (state == .Began) {
             initialLocation = location
             initialLocations = locations
@@ -138,10 +137,10 @@ class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
 
 // MARK: - Dynamic variables
 
-extension DirectedPinchGestureRecognizer {
+public extension DirectedPinchGestureRecognizer {
     
     /// The pinch gesture recognizer's current location in `view`, calculated using `locationInView()`. Returns `nil` if `view` is `nil`.
-    var location: CGPoint? {
+    public var location: CGPoint? {
         guard let view = view else {
             return nil
         }
@@ -150,7 +149,7 @@ extension DirectedPinchGestureRecognizer {
     }
     
     /// The pinch gesture recognizer's first two touch locations in `view`, calculated using `locationOfTouch()`. Returns `nil` if `view` is `nil`, or the number of touches is less than two.
-    var locations: (CGPoint, CGPoint)? {
+    public var locations: (CGPoint, CGPoint)? {
         guard let view = view where numberOfTouches() >= 2 else {
             return nil
         }
@@ -162,7 +161,7 @@ extension DirectedPinchGestureRecognizer {
     }
     
     /// The pinch gesture recognizer's current orientation in `view`, calculated by comparing the first two touch locations with one another. Returns `nil` if `view` is `nil`, or if the touches are on top of one another (which should never happen).
-    var orientation: Orientation? {
+    public var orientation: Orientation? {
         guard let vector = vector() else {
             return nil
         }
@@ -177,7 +176,7 @@ extension DirectedPinchGestureRecognizer {
     }
     
     /// The pinch gesture recognizer's current divergence type. Returns `nil` if `scale` is `1.0`, `.Inwards` if `scale` is less than `1.0`, or `.Outwards` if `scale` is greater than `1.0`.
-    var divergence: Divergence? {
+    public var divergence: Divergence? {
         if (scale == 1.0) {
             return nil
         } else if (scale < 1.0) {
@@ -191,7 +190,7 @@ extension DirectedPinchGestureRecognizer {
 
 // MARK: - Orientational helpers
 
-extension DirectedPinchGestureRecognizer {
+public extension DirectedPinchGestureRecognizer {
     
     /**
      The pan gesture recognizer's current scale, *in points*, in a given orientation and divergence.
@@ -202,7 +201,7 @@ extension DirectedPinchGestureRecognizer {
      - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `linearScale(forOrientation: .Vertical, andDivergence: .Outwards)` should return `10.0`.
      */
     
-    func linearScale(inOrientation orientation: Orientation? = nil, andDivergence divergence: Divergence? = nil) -> CGFloat {
+    public func linearScale(inOrientation orientation: Orientation? = nil, andDivergence divergence: Divergence? = nil) -> CGFloat {
         guard let orientation = orientation ?? initialOrientation, divergence = divergence ?? initialDivergence else {
             return 0.0
         }
@@ -228,7 +227,7 @@ extension DirectedPinchGestureRecognizer {
      - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `geometricScale(forOrientation: .Vertical, andDivergence: .Outwards)` should return `1.5`.
      */
     
-    func geometricScale(inOrientation orientation: Orientation? = nil, withDivergence divergence: Divergence? = nil) -> CGFloat {
+    public func geometricScale(inOrientation orientation: Orientation? = nil, withDivergence divergence: Divergence? = nil) -> CGFloat {
         guard let orientation = orientation ?? initialOrientation, divergence = divergence ?? initialDivergence else {
             return 0.0
         }
