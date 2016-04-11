@@ -89,7 +89,7 @@ gestureRecognizer.minimumGeometricScale = 1.0
 
 ### Todo:
 
-- Make demo project
+- Fix bugs
 - Make GIF preview
 - Publish to Cocoapods
 - Publish to Carthage
