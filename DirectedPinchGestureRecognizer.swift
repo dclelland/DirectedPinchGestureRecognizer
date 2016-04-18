@@ -71,7 +71,7 @@ public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     
     override public var delegate: UIGestureRecognizerDelegate? {
         didSet {
-            self.addTarget(self, action: "onPinch")
+            self.addTarget(self, action: #selector(onPinch))
         }
     }
     
