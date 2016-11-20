@@ -13,43 +13,43 @@ import UIKit.UIGestureRecognizerSubclass
 @objc public protocol DirectedPinchGestureRecognizerDelegate: UIGestureRecognizerDelegate {
     
     /// Called when the pinch gesture recognizer starts.
-    optional func directedPinchGestureRecognizerDidStart(gestureRecognizer: DirectedPinchGestureRecognizer)
+    @objc optional func directedPinchGestureRecognizer(didStart gestureRecognizer: DirectedPinchGestureRecognizer)
     
     /// Called when the pinch gesture recognizer updates.
-    optional func directedPinchGestureRecognizerDidUpdate(gestureRecognizer: DirectedPinchGestureRecognizer)
+    @objc optional func directedPinchGestureRecognizer(didUpdate gestureRecognizer: DirectedPinchGestureRecognizer)
     
-    /// Called when the pinch gesture recognizer cancels. A pinch gesture recognizer may cancel if its linear or geometric scale in `initialOrientation` and `initialDivergence` is less than the value of `minimumLinearScale` or `minimumGeometricScale`, respectively.
-    optional func directedPinchGestureRecognizerDidCancel(gestureRecognizer: DirectedPinchGestureRecognizer)
+    /// Called when the pinch gesture recognizer cancels. A pinch gesture recognizer may cancel if its linear or geometric scale in `initialDirection` and `initialAxis` is less than the value of `minimumLinearScale` or `minimumGeometricScale`, respectively.
+    @objc optional func directedPinchGestureRecognizer(didCancel gestureRecognizer: DirectedPinchGestureRecognizer)
     
-    /// Called when the pinch gesture recognizer cancels. A pinch gesture recognizer may finish if its linear or geometric scale in `initialOrientation` and `initialDivergence` are greater than or equal to the value of `minimumLinearScale` or `minimumGeometricScale`, respectively.
-    optional func directedPinchGestureRecognizerDidFinish(gestureRecognizer: DirectedPinchGestureRecognizer)
+    /// Called when the pinch gesture recognizer cancels. A pinch gesture recognizer may finish if its linear or geometric scale in `initialDirection` and `initialAxis` are greater than or equal to the value of `minimumLinearScale` or `minimumGeometricScale`, respectively.
+    @objc optional func directedPinchGestureRecognizer(didFinish gestureRecognizer: DirectedPinchGestureRecognizer)
 
 }
 
 public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     
-    /// The pinch gesture recognizer's orientation. Also used to calculate attributes for a given orientation.
-    public enum Orientation {
-        /// The pinch gesture recognizer's touches are oriented vertically relative to one another.
-        case Vertical
-        /// The pinch gesture recognizer's touches are oriented horizontally relative to one another.
-        case Horizontal
+    /// The pinch gesture recognizer's direction, i.e. inwards or outwards. Also used to calculate attributes for a given type.
+    public enum Direction {
+        /// The pinch gesture recognizer's touches move inwards relative to one another.
+        case inwards
+        /// The pinch gesture recognizer's touches move outwards relative to one another.
+        case outwards
     }
     
-    /// The pinch gesture recognizer's divergence type, i.e. inwards or outwards. Also used to calculate attributes for a given type.
-    public enum Divergence {
-        /// The pinch gesture recognizer's touches move inwards relative to one another.
-        case Inwards
-        /// The pinch gesture recognizer's touches move outwards relative to one another.
-        case Outwards
+    /// The pinch gesture recognizer's primary axis. Also used to calculate attributes along a given axis.
+    public enum Axis {
+        /// The pinch gesture recognizer's touches are oriented vertically relative to one another.
+        case vertical
+        /// The pinch gesture recognizer's touches are oriented horizontally relative to one another.
+        case horizontal
     }
     
     // MARK: Configuration
     
-    /// Minimum linear scale (in `initialOrientation` and `initialDivergence`) required for the gesture to finish. Defaults to `0.0`.
+    /// Minimum linear scale (in `initialDirection` and `initialAxis`) required for the gesture to finish. Defaults to `0.0`.
     @IBInspectable public var minimumLinearScale: CGFloat = 0.0
     
-    /// Minimum geometric scale (in `initialOrientation` and `initialDivergence`) required for the gesture to finish. Defaults to `1.0`.
+    /// Minimum geometric scale (in `initialDirection` and `initialAxis`) required for the gesture to finish. Defaults to `1.0`.
     /// **KNOWN ISSUE**: As this variable is `@IBInspectable`, its value may be reset to `0.0` when used in Interface Builder.
     @IBInspectable public var minimumGeometricScale: CGFloat = 1.0
     
@@ -61,11 +61,11 @@ public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     /// The current location of both touches in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
     public private(set) var initialLocations: (CGPoint, CGPoint)?
     
-    /// The current orientation in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
-    public private(set) var initialOrientation: Orientation?
+    /// The current direction in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
+    public private(set) var initialDirection: Direction?
     
-    /// The current divergence in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
-    public private(set) var initialDivergence: Divergence?
+    /// The current axis in `view` when the pinch gesture recognizer begins. Defaults to `nil`. Resets to `nil` when `reset()` is called.
+    public private(set) var initialAxis: Axis?
     
     // MARK: Delegation
     
@@ -93,35 +93,35 @@ public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
         
         initialLocation = nil
         initialLocations = nil
-        initialOrientation = nil
-        initialDivergence = nil
+        initialDirection = nil
+        initialAxis = nil
     }
     
     // MARK: Actions
     
     internal func onPinch() {
-        if (state == .Began) {
+        if (state == .began) {
             initialLocation = location
             initialLocations = locations
-            initialOrientation = orientation
-            initialDivergence = divergence
+            initialDirection = direction
+            initialAxis = axis
         }
         
-        if (state != .Ended && locations == nil) {
-            state = .Ended
+        if (state != .ended && locations == nil) {
+            state = .ended
         }
         
         switch state {
-        case .Began:
-            directedPinchDelegate?.directedPinchGestureRecognizerDidStart?(self)
-        case .Changed:
-            directedPinchDelegate?.directedPinchGestureRecognizerDidUpdate?(self)
-        case .Cancelled:
-            directedPinchDelegate?.directedPinchGestureRecognizerDidCancel?(self)
-        case .Ended where shouldCancel():
-            directedPinchDelegate?.directedPinchGestureRecognizerDidCancel?(self)
-        case .Ended:
-            directedPinchDelegate?.directedPinchGestureRecognizerDidFinish?(self)
+        case .began:
+            directedPinchDelegate?.directedPinchGestureRecognizer?(didStart: self)
+        case .changed:
+            directedPinchDelegate?.directedPinchGestureRecognizer?(didUpdate: self)
+        case .cancelled:
+            directedPinchDelegate?.directedPinchGestureRecognizer?(didCancel: self)
+        case .ended where shouldCancel:
+            directedPinchDelegate?.directedPinchGestureRecognizer?(didCancel: self)
+        case .ended:
+            directedPinchDelegate?.directedPinchGestureRecognizer?(didFinish: self)
         default:
             break
         }
@@ -129,7 +129,7 @@ public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
     
     // MARK: Cancellation
     
-    private func shouldCancel() -> Bool {
+    private var shouldCancel: Bool {
         return linearScale() < minimumLinearScale || geometricScale() < minimumGeometricScale
     }
     
@@ -139,107 +139,107 @@ public class DirectedPinchGestureRecognizer: UIPinchGestureRecognizer {
 
 public extension DirectedPinchGestureRecognizer {
     
-    /// The pinch gesture recognizer's current location in `view`, calculated using `locationInView()`. Returns `nil` if `view` is `nil`.
+    /// The pinch gesture recognizer's current location in `view`, calculated using `location(in:)`. Returns `nil` if `view` is `nil`.
     public var location: CGPoint? {
         guard let view = view else {
             return nil
         }
         
-        return locationInView(view)
+        return location(in: view)
     }
     
-    /// The pinch gesture recognizer's first two touch locations in `view`, calculated using `locationOfTouch()`. Returns `nil` if `view` is `nil`, or the number of touches is less than two.
+    /// The pinch gesture recognizer's first two touch locations in `view`, calculated using `location(ofTouch:in:)`. Returns `nil` if `view` is `nil`, or the number of touches is less than two.
     public var locations: (CGPoint, CGPoint)? {
-        guard let view = view where numberOfTouches() >= 2 else {
+        guard let view = view, numberOfTouches >= 2 else {
             return nil
         }
         
-        let firstLocation = locationOfTouch(0, inView: view)
-        let secondLocation = locationOfTouch(1, inView: view)
+        let firstLocation = location(ofTouch: 0, in: view)
+        let secondLocation = location(ofTouch: 1, in: view)
         
         return (firstLocation, secondLocation)
     }
     
-    /// The pinch gesture recognizer's current orientation in `view`, calculated by comparing the first two touch locations with one another. Returns `nil` if `view` is `nil`, or if the touches are on top of one another (which should never happen).
-    public var orientation: Orientation? {
-        guard let vector = vector() else {
-            return nil
-        }
-        
-        if (vector == CGVector.zero) {
-            return nil
-        } else if (fabs(vector.dx) < fabs(vector.dy)) {
-            return .Vertical
-        } else {
-            return .Horizontal
-        }
-    }
-    
-    /// The pinch gesture recognizer's current divergence type. Returns `nil` if `scale` is `1.0`, `.Inwards` if `scale` is less than `1.0`, or `.Outwards` if `scale` is greater than `1.0`.
-    public var divergence: Divergence? {
+    /// The pinch gesture recognizer's current direction. Returns `nil` if `scale` is `1.0`, `.inwards` if `scale` is less than `1.0`, or `.outwards` if `scale` is greater than `1.0`.
+    public var direction: Direction? {
         if (scale == 1.0) {
             return nil
         } else if (scale < 1.0) {
-            return .Inwards
+            return .inwards
         } else {
-            return .Outwards
+            return .outwards
+        }
+    }
+    
+    /// The pinch gesture recognizer's current axis in `view`, calculated by comparing the first two touch locations with one another. Returns `nil` if `view` is `nil`, or if the touches are on top of one another (which should never happen).
+    public var axis: Axis? {
+        guard let vector = vector else {
+            return nil
+        }
+        
+        if (vector == .zero) {
+            return nil
+        } else if (fabs(vector.dx) < fabs(vector.dy)) {
+            return .vertical
+        } else {
+            return .horizontal
         }
     }
     
 }
 
-// MARK: - Orientational helpers
+// MARK: - Directional helpers
 
 public extension DirectedPinchGestureRecognizer {
     
     /**
-     The pan gesture recognizer's current scale, *in points*, in a given orientation and divergence.
+     The pan gesture recognizer's current scale, *in points*, in a given direction and axis.
      
-     - parameter orientation: The orientation. Defaults to `nil`, in which case `initialOrientation` is used.
-     - parameter divergence: The divergence. Defaults to `nil`, in which case `initialDivergence` is used.
+     - parameter direction: The direction. Defaults to `nil`, in which case `initialDirection` is used.
+     - parameter axis: The axis. Defaults to `nil`, in which case `initialAxis` is used.
      
-     - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `linearScale(inOrientation: .Vertical, andDivergence: .Outwards)` should return `10.0`.
+     - returns: Returns `0.0` if either `direction` or `axis` (or the `initialDirection` and `initialAxis` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given direction and axis. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `linearScale(inDirection: .outwards, onAxis: .vertical)` should return `10.0`.
      */
     
-    public func linearScale(inOrientation orientation: Orientation? = nil, andDivergence divergence: Divergence? = nil) -> CGFloat {
-        guard let orientation = orientation ?? initialOrientation, divergence = divergence ?? initialDivergence else {
+    public func linearScale(inDirection direction: Direction? = nil, onAxis axis: Axis? = nil) -> CGFloat {
+        guard let direction = direction ?? initialDirection, let axis = axis ?? initialAxis else {
             return 0.0
         }
         
-        guard let initialMagnitude = initialVector()?.magnitude(inOrientation: orientation), magnitude = vector()?.magnitude(inOrientation: orientation) else {
+        guard let initialMagnitude = initialVector?.magnitude(onAxis: axis), let magnitude = vector?.magnitude(onAxis: axis) else {
             return 0.0
         }
         
-        switch divergence {
-        case .Inwards:
+        switch direction {
+        case .inwards:
             return initialMagnitude - magnitude
-        case .Outwards:
+        case .outwards:
             return magnitude - initialMagnitude
         }
     }
     
     /**
-     The pan gesture recognizer's current scale, *in a relative, dimensionless unit*, in a given orientation and divergence.
+     The pan gesture recognizer's current scale, *in a relative, dimensionless unit*, in a given direction and axis.
      
-     - parameter orientation: The orientation. Defaults to `nil`, in which case `initialOrientation` is used.
-     - parameter divergence: The divergence. Defaults to `nil`, in which case `initialDivergence` is used.
+     - parameter direction: The direction. Defaults to `nil`, in which case `initialDirection` is used.
+     - parameter axis: The axis. Defaults to `nil`, in which case `initialAxis` is used.
      
-     - returns: Returns `0.0` if either `orientation` or `divergence` (or the `initialOrientation` and `initialDivergence` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given orientation and divergence. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `geometricScale(inOrientation: .Vertical, andDivergence: .Outwards)` should return `1.5`.
+     - returns: Returns `0.0` if either `direction` or `axis` (or the `initialDirection` and `initialAxis` fallbacks, respectively) are `nil`. Else, takes the current two touch locations and calculates how far they have moved relative to one another, in the given direction and axis. For example, if the two points were vertically 20 points away from each other, and they then move to be 30 points away from each other, then `geometricScale(inDirection: .outwards, onAxis: .vertical)` should return `1.5`.
      */
     
-    public func geometricScale(inOrientation orientation: Orientation? = nil, withDivergence divergence: Divergence? = nil) -> CGFloat {
-        guard let orientation = orientation ?? initialOrientation, divergence = divergence ?? initialDivergence else {
+    public func geometricScale(inDirection direction: Direction? = nil, onAxis axis: Axis? = nil) -> CGFloat {
+        guard let direction = direction ?? initialDirection, let axis = axis ?? initialAxis else {
             return 0.0
         }
         
-        guard let initialMagnitude = initialVector()?.magnitude(inOrientation: orientation), magnitude = vector()?.magnitude(inOrientation: orientation) else {
+        guard let initialMagnitude = initialVector?.magnitude(onAxis: axis), let magnitude = vector?.magnitude(onAxis: axis) else {
             return 0.0
         }
         
-        switch divergence {
-        case .Inwards:
+        switch direction {
+        case .inwards:
             return initialMagnitude / magnitude
-        case .Outwards:
+        case .outwards:
             return magnitude / initialMagnitude
         }
     }
@@ -250,7 +250,7 @@ public extension DirectedPinchGestureRecognizer {
 
 private extension DirectedPinchGestureRecognizer {
     
-    func initialVector() -> CGVector? {
+    var initialVector: CGVector? {
         guard let (firstLocation, secondLocation) = initialLocations else {
             return nil
         }
@@ -261,7 +261,7 @@ private extension DirectedPinchGestureRecognizer {
         return CGVector(dx: dx, dy: dy)
     }
     
-    func vector() -> CGVector? {
+    var vector: CGVector? {
         guard let (firstLocation, secondLocation) = locations else {
             return nil
         }
@@ -276,11 +276,11 @@ private extension DirectedPinchGestureRecognizer {
 
 private extension CGVector {
     
-    func magnitude(inOrientation orientation: DirectedPinchGestureRecognizer.Orientation) -> CGFloat {
-        switch orientation {
-        case .Vertical:
+    func magnitude(onAxis axis: DirectedPinchGestureRecognizer.Axis) -> CGFloat {
+        switch axis {
+        case .vertical:
             return abs(dy)
-        case .Horizontal:
+        case .horizontal:
             return abs(dx)
         }
     }

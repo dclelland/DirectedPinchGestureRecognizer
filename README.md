@@ -1,6 +1,6 @@
 # DirectedPinchGestureRecognizer
 
-DirectedPinchGestureRecognizer is a UIPinchGestureRecognizer subclass providing a richer API for working with pinch gestures.
+DirectedPinchGestureRecognizer is a UIPinchGestureRecognizer subclass providing a richer API for working with pinch gestures in Swift 3.
 
 ```
 let gestureRecognizer = DirectedPinchGestureRecognizer()
@@ -11,7 +11,7 @@ view.addGestureRecognizer(gestureRecognizer)
 #### Installation:
 
 ```ruby
-pod 'DirectedPinchGestureRecognizer', '~> 0.1'
+pod 'DirectedPinchGestureRecognizer', '~> 1.0'
 ```
 
 #### Usage:
@@ -27,22 +27,20 @@ view.addGestureRecognizer(gestureRecognizer)
 ✓ Keeps track of the initial state of the gesture:
 
 ```swift
-if (gestureRecognizer.initialOrientation == .Horizontal) {
-    if (gestureRecognizer.orientation == .Vertical) {
-        print("Gesture recognizer started pinching horizontally and then rotated to a vertical orientation")
+if (gestureRecognizer.initialAxis == .horizontal) {
+    if (gestureRecognizer.axis == .vertical) {
+        print("Gesture recognizer started pinching horizontally and then rotated to a vertical axis")
     }
 }
 ```
 
-✓ Enforce the gesture's starting orientation and divergence:
-
-*Note: This library uses the word "divergence" as a Term of Art to designate whether a pinch is moving inwards or outwards.*
+✓ Enforce the gesture's starting direction and axisx:
 
 ```swift
 func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
     switch gestureRecognizer {
     case let pinchGestureRecognizer as DirectedPinchGestureRecognizer where pinchGestureRecognizer == self.pinchGestureRecognizer
-        return pinchGestureRecognizer.orientation == .Vertical && pinchGestureRecognizer.divergence == .Outwards
+        return pinchGestureRecognizer.direction == .outwards && pinchGestureRecognizer.axis == .vertical
     default:
         return true
     }
@@ -52,32 +50,32 @@ func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Boo
 ✓ Delegate protocol methods for `start`, `update`, `cancel`, and `finish` events:
 
 ```swift
-func directedPinchGestureRecognizerDidStart(gestureRecognizer: DirectedPinchGestureRecognizer) {
+func directedPinchGestureRecognizer(didStart gestureRecognizer: DirectedPinchGestureRecognizer) {
     print("Gesture recognizer started")
 }
 
-func directedPinchGestureRecognizerDidUpdate(gestureRecognizer: DirectedPinchGestureRecognizer) {
+func directedPinchGestureRecognizer(didUpdate gestureRecognizer: DirectedPinchGestureRecognizer) {
     print("Gesture recognizer updated")
 }
 
-func directedPinchGestureRecognizerDidCancel(gestureRecognizer: DirectedPinchGestureRecognizer) {
+func directedPinchGestureRecognizer(didCancel gestureRecognizer: DirectedPinchGestureRecognizer) {
     print("Gesture recognizer cancelled")
 }
 
-func directedPinchGestureRecognizerDidFinish(gestureRecognizer: DirectedPinchGestureRecognizer) {
+func directedPinchGestureRecognizer(didFinish gestureRecognizer: DirectedPinchGestureRecognizer) {
     print("Gesture recognizer finished")
 }
 ```
 
-✓ Convenience methods for `location`, `locations`, `orientation`, `divergence`, `linearScale` (scale in points), and `geometricScale` (scale as a dimensionless unit):
+✓ Convenience methods for `location`, `locations`, `direction`, `axis`, `linearScale` (scale in points), and `geometricScale` (scale as a dimensionless unit):
 
 ```swift
 let location = gestureRecognizer.location // CGPoint?
 let locations = gestureRecognizer.locations // (CGPoint, CGPoint)?
-let orientation = gestureRecognizer.orientation // DirectedPinchGestureRecognizer.Orientation?
-let divergence = gestureRecognizer.divergence // DirectedPinchGestureRecognizer.Divergence?
-let linearScale = gestureRecognizer.linearScale(inOrientation: .Vertical, andDivergence: .Outwards) // CGFloat
-let geometricScale = gestureRecognizer.geometricrScale(inOrientation: .Vertical, andDivergence: .Outwards) // CGFloat
+let direction = gestureRecognizer.direction // DirectedPinchGestureRecognizer.Direction?
+let axis = gestureRecognizer.axis // DirectedPinchGestureRecognizer.Axis?
+let linearScale = gestureRecognizer.linearScale(inAxis: .vertical, andDirection: .outwards) // CGFloat
+let geometricScale = gestureRecognizer.geometricrScale(inAxis: .vertical, andDirection: .outwards) // CGFloat
 ```
 
 ✓ `IBDesignable` parameters for enforcing a minimum linear/geometric scale:
@@ -86,11 +84,3 @@ let geometricScale = gestureRecognizer.geometricrScale(inOrientation: .Vertical,
 gestureRecognizer.minimumLinearScale = 64.0
 gestureRecognizer.minimumGeometricScale = 1.0
 ```
-
-### Todo:
-
-- Fix bugs
-- Make GIF preview
-- Publish to Cocoapods
-- Publish to Carthage
-- Publish to Cocoa controls
